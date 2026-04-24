@@ -51,4 +51,22 @@ public final class ToastyManager: ObservableObject {
 
         show(message: message, type: .error)
     }
+
+    /// Shows an error toast with the given message string.
+    /// - Parameter message: Text to display.
+    public func showError(_ message: String) {
+        show(message: message, type: .error)
+    }
+
+    /// Shows a success toast with the given message.
+    /// - Parameter message: Text to display.
+    public func showSuccess(_ message: String) {
+        show(message: message, type: .success)
+    }
+
+    /// Shows an info toast with the given message and no icon.
+    /// - Parameter message: Text to display.
+    public func showInfo(_ message: String) {
+        show(message: message, type: .info)
+    }
 }

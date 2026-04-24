@@ -23,9 +23,11 @@ public struct ToastyView: View {
 
     public var body: some View {
         HStack(spacing: 12) {
-            Image(systemName: toast.type.iconName)
-                .foregroundColor(.white)
-                .font(.system(size: 16, weight: .medium))
+            if let iconName = toast.type.iconName {
+                Image(systemName: iconName)
+                    .foregroundColor(.white)
+                    .font(.system(size: 16, weight: .medium))
+            }
 
             Text(toast.message)
                 .foregroundColor(.white)
