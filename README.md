@@ -3,93 +3,73 @@
 [![Swift](https://img.shields.io/badge/Swift-6.2+-orange?style=flat-square&logo=swift)](https://swift.org)
 [![iOS](https://img.shields.io/badge/iOS-16.0+-blue?style=flat-square&logo=apple)](https://www.apple.com/ios/)
 [![macOS](https://img.shields.io/badge/macOS-13.0+-lightgrey?style=flat-square&logo=apple)](https://www.apple.com/macos/)
-[![Version](https://img.shields.io/badge/Version-1.0.0-blue?style=flat-square)](https://github.com/tonusername/Toasty/releases)
+[![Version](https://img.shields.io/badge/Version-1.1.0-blue?style=flat-square)](https://github.com/tonusername/Toasty/releases)
 [![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)](LICENSE)
 
-A lightweight, accessible toast notification system for iOS and macOS. Show error messages and notifications with minimal setup.
+A lightweight, accessible toast notification system for iOS and macOS. Show error, success, and info messages with minimal setup.
 
 ## Features ✨
 
-- 🎯 Simple API - show messages with one line of code
-- 🎨 Customizable toast styles and types
+- 🎯 Simple API — show messages with one line of code
+- 🎨 Three built-in toast types: error, success, info
 - 📱 Works on iOS 16+ and macOS 13+
 - 🚀 Smooth animations and transitions
-- 🎭 Multiple toast types (error, success, info coming soon)
+- ♿ Accessible dismiss button
 
 ## Installation 📦
 
 Add Toasty to your `Package.swift`:
-```swift
-.package(url: "https://github.com/yourusername/Toasty.git", from: "1.0.0")
-```
+
+    .package(url: "https://github.com/yourusername/Toasty.git", from: "1.1.0")
 
 Or use Xcode: File → Add Packages → Enter the repository URL.
 
 ## Quick Start 🚀
 
-1. **Create a manager** at app level:
-```swift
-@main
-struct MyApp: App {
-    @StateObject private var toastyManager = ToastyManager()
+1. Wrap your root view with `ToastyContainer`:
 
-    var body: some Scene {
-        WindowGroup {
-            ToastyContainer(manager: toastyManager) {
-                ContentView()
+    @main
+    struct MyApp: App {
+        @StateObject private var toasty = ToastyManager()
+
+        var body: some Scene {
+            WindowGroup {
+                ToastyContainer(manager: toasty) {
+                    ContentView()
+                }
+                .environmentObject(toasty)
             }
         }
     }
-}
-```
 
-2. **Show a toast** anywhere in your app:
-```swift
-@EnvironmentObject var toastyManager: ToastyManager
+2. Show a toast anywhere in your app:
 
-Button("Show Error") {
-    toastyManager.show(message: "Something went wrong!", type: .error)
-}
-```
+    @EnvironmentObject var toasty: ToastyManager
 
-3. **Show from an Error**:
-```swift
-do {
-    try await fetchData()
-} catch {
-    toastyManager.showError(error, fallbackMessage: "Failed to load data")
-}
-```
+    toasty.showError(error)
+    toasty.showError("Something went wrong.")
+    toasty.showSuccess("Saved successfully.")
+    toasty.showInfo("Sync completed.")
+    toasty.show(message: "Hello", type: .error)
 
-## Usage 📖
+## Toast Types 🎨
 
-### Show a Message
-```swift
-toastyManager.show(message: "Processing...", type: .error)
-```
+| Type     | Color     | Icon                          |
+|----------|-----------|-------------------------------|
+| .error   | Red       | exclamationmark.triangle.fill |
+| .success | Green     | checkmark.circle.fill         |
+| .info    | Dark gray | None                          |
 
-### Dismiss
-```swift
-toastyManager.dismiss()
-```
+## API Reference 📖
 
-### Check if Visible
-```swift
-if toastyManager.hasToast {
-    // A toast is currently displayed
-}
-```
-
-## Customization 🎨
-
-Create custom toast types by extending `ToastyType`:
-```swift
-extension ToastyType {
-    static var success: ToastyType {
-        // Implement custom styling
-    }
-}
-```
+    toasty.show(message:type:)
+    toasty.showError(_ error: Error, fallbackMessage:)
+    toasty.showError(_ message: String)
+    toasty.showSuccess(_ message: String)
+    toasty.showInfo(_ message: String)
+    toasty.dismiss()
+    toasty.hasToast       // Bool
+    toasty.currentToast   // ToastyMessage?
 
 ## Requirements 📋
 
@@ -103,4 +83,4 @@ MIT License
 
 ## Support 💬
 
-For issues, feature requests, or questions, open an issue on GitHub.
+For issues or feature requests, open an issue on GitHub.
