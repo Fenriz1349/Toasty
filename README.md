@@ -11,7 +11,6 @@ A lightweight, accessible toast notification system for iOS and macOS. Show erro
 ## Features ✨
 
 - 🎯 Simple API - show messages with one line of code
-- ♿ Built with accessibility in mind (VoiceOver support)
 - 🎨 Customizable toast styles and types
 - 📱 Works on iOS 16+ and macOS 13+
 - 🚀 Smooth animations and transitions
@@ -91,14 +90,6 @@ extension ToastyType {
     }
 }
 ```
-
-## Accessibility ♿
-
-Toasty is built with accessibility as a priority:
-- VoiceOver support
-- Clear dismiss button labeling
-- High contrast colors
-- Semantic HTML structure
 
 ## Requirements 📋
 
