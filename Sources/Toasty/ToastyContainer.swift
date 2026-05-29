@@ -14,10 +14,6 @@ public struct ToastyContainer<Content: View>: View {
     @ObservedObject private var manager: ToastyManager
     private let content: Content
 
-    /// Creates a container.
-    /// - Parameters:
-    ///   - manager: Shared ToastyManager instance.
-    ///   - content: Your root view.
     public init(manager: ToastyManager, @ViewBuilder content: () -> Content) {
         self.manager = manager
         self.content = content()
@@ -29,21 +25,8 @@ public struct ToastyContainer<Content: View>: View {
     }
 }
 
-// MARK: - Passthrough Window
-
-/// A UIWindow subclass that forwards touches to the window below
-/// when they don't land on an interactive subview (i.e. outside the toast).
-private final class PassthroughWindow: UIWindow {
-    override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
-        guard let hitView = super.hitTest(point, with: event) else { return nil }
-        return rootViewController?.view == hitView ? nil : hitView
-    }
-}
-
 // MARK: - UIKit Window Overlay
 
-/// UIViewRepresentable bridge that presents the toast in a dedicated UIWindow
-/// sitting above all SwiftUI sheets and modals.
 private struct ToastyWindowHost: UIViewRepresentable {
     @ObservedObject var manager: ToastyManager
 
@@ -64,27 +47,40 @@ private struct ToastyWindowHost: UIViewRepresentable {
         private var window: UIWindow?
 
         func show(toast: ToastyMessage, manager: ToastyManager, from view: UIView) {
-            guard window == nil,
-                  let windowScene = view.window?.windowScene else { return }
+            // Hide any existing toast first
+            hide()
+
+            guard let windowScene = view.window?.windowScene else { return }
 
             let overlayWindow = PassthroughWindow(windowScene: windowScene)
             overlayWindow.windowLevel = .alert + 1
             overlayWindow.backgroundColor = .clear
-            overlayWindow.isUserInteractionEnabled = true
 
-            let controller = UIHostingController(rootView:
-                VStack {
-                    ToastyView(toast: toast) {
-                        withAnimation(.easeOut(duration: 0.25)) { manager.dismiss() }
-                    }
-                    .transition(.move(edge: .top).combined(with: .opacity))
-                    Spacer()
+            // Transparent root — its view is the passthrough target
+            let rootVC = UIViewController()
+            rootVC.view.backgroundColor = .clear
+
+            // Toast hosted in a child controller constrained to the top
+            let toastVC = UIHostingController(rootView:
+                ToastyView(toast: toast) {
+                    withAnimation(.easeOut(duration: 0.25)) { manager.dismiss() }
                 }
-                .animation(.spring(response: 0.55, dampingFraction: 0.85), value: manager.hasToast)
-                .padding(.top, 8)
+                .transition(.move(edge: .top).combined(with: .opacity))
             )
-            controller.view.backgroundColor = .clear
-            overlayWindow.rootViewController = controller
+            toastVC.sizingOptions = [.intrinsicContentSize]
+            toastVC.view.backgroundColor = .clear
+            toastVC.view.translatesAutoresizingMaskIntoConstraints = false
+
+            rootVC.addChild(toastVC)
+            rootVC.view.addSubview(toastVC.view)
+            NSLayoutConstraint.activate([
+                toastVC.view.topAnchor.constraint(equalTo: rootVC.view.safeAreaLayoutGuide.topAnchor, constant: 8),
+                toastVC.view.leadingAnchor.constraint(equalTo: rootVC.view.leadingAnchor, constant: 16),
+                toastVC.view.trailingAnchor.constraint(equalTo: rootVC.view.trailingAnchor, constant: -16)
+            ])
+            toastVC.didMove(toParent: rootVC)
+
+            overlayWindow.rootViewController = rootVC
             overlayWindow.isHidden = false
             self.window = overlayWindow
         }
@@ -93,5 +89,18 @@ private struct ToastyWindowHost: UIViewRepresentable {
             window?.isHidden = true
             window = nil
         }
+    }
+}
+
+// MARK: - Passthrough Window
+
+/// Forwards touches to the window below when they land on the transparent
+/// background. Touches on the toast itself are handled normally.
+private final class PassthroughWindow: UIWindow {
+    override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
+        guard let result = super.hitTest(point, with: event) else { return nil }
+        // Pass through if the hit is on the window or the transparent root view
+        if result === self || result === rootViewController?.view { return nil }
+        return result
     }
 }
