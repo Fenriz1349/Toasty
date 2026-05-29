@@ -3,7 +3,7 @@
 [![Swift](https://img.shields.io/badge/Swift-6.2+-orange?style=flat-square&logo=swift)](https://swift.org)
 [![iOS](https://img.shields.io/badge/iOS-16.0+-blue?style=flat-square&logo=apple)](https://www.apple.com/ios/)
 [![macOS](https://img.shields.io/badge/macOS-13.0+-lightgrey?style=flat-square&logo=apple)](https://www.apple.com/macos/)
-[![Version](https://img.shields.io/badge/Version-1.3.0-blue?style=flat-square)](https://github.com/tonusername/Toasty/releases)
+[![Version](https://img.shields.io/badge/Version-1.3.1-blue?style=flat-square)](https://github.com/tonusername/Toasty/releases)
 [![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)](LICENSE)
 
 A lightweight, accessible toast notification system for iOS and macOS. Show error, success, and info messages with minimal setup.
