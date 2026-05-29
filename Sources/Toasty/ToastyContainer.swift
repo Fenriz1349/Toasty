@@ -29,6 +29,17 @@ public struct ToastyContainer<Content: View>: View {
     }
 }
 
+// MARK: - Passthrough Window
+
+/// A UIWindow subclass that forwards touches to the window below
+/// when they don't land on an interactive subview (i.e. outside the toast).
+private final class PassthroughWindow: UIWindow {
+    override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
+        guard let hitView = super.hitTest(point, with: event) else { return nil }
+        return rootViewController?.view == hitView ? nil : hitView
+    }
+}
+
 // MARK: - UIKit Window Overlay
 
 /// UIViewRepresentable bridge that presents the toast in a dedicated UIWindow
@@ -56,7 +67,7 @@ private struct ToastyWindowHost: UIViewRepresentable {
             guard window == nil,
                   let windowScene = view.window?.windowScene else { return }
 
-            let overlayWindow = UIWindow(windowScene: windowScene)
+            let overlayWindow = PassthroughWindow(windowScene: windowScene)
             overlayWindow.windowLevel = .alert + 1
             overlayWindow.backgroundColor = .clear
             overlayWindow.isUserInteractionEnabled = true
